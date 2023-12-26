@@ -6,7 +6,7 @@ RSpec.describe Events::AdCreated do
   describe ".publish" do
     subject(:publish) do
       described_class.publish(
-        data: {title: "Some title", description: "Some description"},
+        data: {title: "Some title", body: "Some description"},
         stream_name: "123456789",
       )
     end
@@ -17,9 +17,9 @@ RSpec.describe Events::AdCreated do
         event_type: "Events::AdCreated",
         data: {
           "title" => "Some title",
-          "description" => "Some description"
+          "body" => "Some description"
         },
-        aggregate_id: "123456789"
+        stream_name: "123456789"
       )
     end
   end
