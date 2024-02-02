@@ -7,21 +7,53 @@ RSpec.describe Events::BaseEvent do
     stub_const("FakeEvent", fake_event)
   end
 
-  describe ".publish" do
-    context "when schema on a base event is undefined" do
-      subject(:publish) { FakeEvent.publish }
+  describe "#initialize" do
+    subject(:init) { FakeEvent.new }
 
+    context "when schema is not defined" do
       let(:fake_event) do
         Class.new(described_class)
       end
 
       it "raises error regarding missing contract" do
-        expect { publish }.to raise_error(
+        expect { init }.to raise_error(
           described_class::MissingContract, "Contract needs to be implemented"
         )
       end
     end
 
+    context "when schema is defined" do
+      let(:fake_event) do
+        Class.new(described_class) do
+          def params_schema
+            Dry::Schema.Params do
+              required(:data).hash do
+                required(:name).filled(:string)
+              end
+            end
+          end
+        end
+      end
+
+      context "with valid initialization arguments" do
+        subject(:init) { FakeEvent.new(data: {name: "whatever"}) }
+
+        it "return valid instance" do
+          expect(init).to be_a(described_class).and have_attributes(data: {name: "whatever"})
+        end
+      end
+
+      context "with invalid initialization arguments" do
+        subject(:init) { FakeEvent.new(data: {name: 125}) }
+
+        it "raises error" do
+          expect { init }.to raise_error(described_class::InvalidAttributes)
+        end
+      end
+    end
+  end
+
+  describe ".publish" do
     context "when schema on a base event is defined" do
       let(:fake_event) do
         Class.new(described_class) do
