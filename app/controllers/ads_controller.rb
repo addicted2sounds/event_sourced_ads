@@ -21,7 +21,9 @@ class AdsController < ApplicationController
 
   # POST /ads or /ads.json
   def create
-    Events::AdCreated.publish(data: ad_params.to_h, stream_name: SecureRandom.uuid)
+    aggregate = AdAggregate.new
+    aggregate.create_draft(title: ad_params[:title], body: ad_params[:body])
+    AdRepository.store(aggregate)
 
     redirect_to ads_path, notice: 'Ad was successfully created.'
   end

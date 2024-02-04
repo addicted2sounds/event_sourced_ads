@@ -27,7 +27,9 @@ RSpec.describe "/ads", type: :request do
           .and change { Ad.count }.by(1)
         expect(Event.last).to have_attributes(
           event_type: "Events::AdCreated",
-          data: valid_attributes.stringify_keys
+          data: {
+            "ad_id" => kind_of(String), **valid_attributes.stringify_keys
+          }
         )
         expect(Ad.last).to have_attributes(
           **valid_attributes, status: "draft"
