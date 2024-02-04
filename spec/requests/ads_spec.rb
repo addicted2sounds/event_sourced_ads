@@ -17,7 +17,7 @@ RSpec.describe "/ads", type: :request do
     { title: "title", body: "body" }
   end
 
-  describe "POST /create" do
+  describe "POST /ads" do
     let(:do_request) { post "/ads", params: { ad: valid_attributes } }
 
     context "with valid parameters" do
@@ -35,6 +35,16 @@ RSpec.describe "/ads", type: :request do
           **valid_attributes, status: "draft"
         )
       end
+    end
+  end
+
+  describe "PATCH /:ad_id" do
+    context "when ad is in the draft state" do
+      it "updates draft attributes"
+    end
+
+    context "when ad is already published" do
+      it "responds with an error"
     end
   end
 end

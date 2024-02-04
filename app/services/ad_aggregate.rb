@@ -1,6 +1,8 @@
 class AdAggregate
   attr_reader :id, :attributes, :state
 
+  AlreadyPublished = Class.new(StandardError)
+
   def initialize(id = nil)
     @id = id || SecureRandom.uuid
     @state = :new
@@ -8,6 +10,18 @@ class AdAggregate
 
   def create_draft(title:, body:)
     apply Events::AdCreated.new(data: {ad_id: id, title:, body:})
+  end
+
+  def update_content(title:, body:)
+    raise AlreadyPublished if state == :published
+
+    apply Events::AdModified.new(data: {ad_id: id, title:, body:})
+  end
+
+  def publish
+    raise AlreadyPublished if state == :published
+
+    apply Events::AdPublished.new(data: {ad_id: id})
   end
 
   def unpublished_events
@@ -28,5 +42,13 @@ class AdAggregate
   def apply_ad_created(event)
     @state = :draft
     @attributes = event.data.slice(:title, :body)
+  end
+
+  def apply_ad_modified(event)
+    @attributes = event.data.slice(:title, :body)
+  end
+
+  def apply_ad_published(event)
+    @state = :published
   end
 end
