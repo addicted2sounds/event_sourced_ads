@@ -11,24 +11,26 @@ module Events
       define_method(:params_schema) do
         Dry::Schema.Params do
           required(:data).hash(inner_schema)
-          required(:stream_name).filled(:string)
         end
       end
     end
 
     def self.publish(**args)
-      new(**args).tap do |event|
-        Event.create!(
-          event_type: name, data: args[:data], stream_name: args[:stream_name]
-        )
-        ActiveSupport::Notifications.instrument(name, args)
-      end
+      new(**args.slice(:data)).publish(stream_name: args[:stream_name])
     end
 
 
     def initialize(**args)
       validate_input(args)
       @data = args[:data]
+    end
+
+    def publish(stream_name: nil)
+      Event.create!(
+        event_type: self.class.name, data:, stream_name:
+      )
+      ActiveSupport::Notifications.instrument(self.class.name, data:, stream_name:)
+      self
     end
 
     def params_schema
