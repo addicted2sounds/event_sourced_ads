@@ -41,7 +41,7 @@ class AdAggregate
 
   def apply_ad_created(event)
     @state = :draft
-    @attributes = event.data.slice(:title, :body)
+    @attributes = event.data.symbolize_keys.slice(:title, :body)
   end
 
   def apply_ad_modified(event)

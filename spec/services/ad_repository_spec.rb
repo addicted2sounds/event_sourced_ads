@@ -18,23 +18,44 @@ RSpec.describe AdRepository do
     end
 
     context "with existing events" do
-      let(:aggregate) { instance_double(AdAggregate, apply: nil) }
+      context "when applying AdCreated event" do
+        before do
+          Event.create(
+            event_type: "Events::AdCreated", stream_name:,
+            data: {ad_id: stream_name, title: "title", body: "body"}
+          )
+        end
 
-      before do
-        Event.create(
-          event_type: "Events::AdCreated", stream_name:,
-          data: {ad_id: stream_name, title: "title", body: "body"}
-        )
-        Event.create(
-          event_type: "Events::AdPublished", stream_name:,
-          data: {ad_id: stream_name, remote_id: "xosfjoj"}
-        )
-      end
+        it "applies event to aggregate" do
+          expect(load).to be_a(AdAggregate).and have_attributes(
+            id: stream_name,
+            state: :draft,
+            attributes: {
+              title: "title",
+              body: "body"
+            }
+          )
+        end
 
-      it "applies events to aggregate" do
-        allow(AdAggregate).to receive(:new).and_return(aggregate)
-        load
-        expect(aggregate).to have_received(:apply).twice
+        context "when applying AdPublished" do
+          before do
+            Event.create(
+              event_type: "Events::AdPublished", stream_name:,
+              data: {ad_id: stream_name, remote_id: "xosfjoj"}
+            )
+          end
+
+          it "applies event to aggregate" do
+            expect(load).to be_a(AdAggregate).and have_attributes(
+              id: stream_name,
+              state: :published,
+              attributes: {
+                title: "title",
+                body: "body"
+              }
+            )
+          end
+        end
       end
     end
   end
