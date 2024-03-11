@@ -1,6 +1,6 @@
 class ApplicationEventListener
   def self.call(event)
-    send(
+    public_send(
       "apply_#{event.name.demodulize.underscore}", **event.payload
     )
   end

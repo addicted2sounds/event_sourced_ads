@@ -7,7 +7,7 @@ module AdRepository
     end
     AdAggregate.new(stream_name).tap do |aggregate|
       events.each do |event|
-        aggregate.send("apply_event", event)
+        aggregate.apply_event(event)
       end
     end
   end

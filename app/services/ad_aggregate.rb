@@ -28,15 +28,15 @@ class AdAggregate
     @unpublished_events ||= []
   end
 
+  def apply_event(event)
+    send("apply_#{event.class.name.demodulize.underscore}", event)
+  end
+
   private
 
   def apply(event)
     unpublished_events << event
     apply_event(event)
-  end
-
-  def apply_event(event)
-    send("apply_#{event.class.name.demodulize.underscore}", event)
   end
 
   def apply_ad_created(event)
