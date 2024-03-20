@@ -1,11 +1,11 @@
-module AdRepository
+module Repository
   extend self
 
-  def load(stream_name)
+  def load(aggregate_class, stream_name)
     events = Event.where(stream_name:).map do |event|
       event.event_type.constantize.new(data: event.data)
     end
-    AdAggregate.new(stream_name).tap do |aggregate|
+    aggregate_class.new(stream_name).tap do |aggregate|
       events.each do |event|
         aggregate.apply_event(event)
       end

@@ -2,15 +2,16 @@
 
 require "rails_helper"
 
-RSpec.describe AdRepository do
+RSpec.describe Repository do
   describe '.load' do
-    subject(:load) { described_class.load(stream_name) }
+    subject(:load) { described_class.load(aggregate_class, stream_name) }
 
+    let(:aggregate_class) { AdAggregate }
     let(:stream_name) { SecureRandom.uuid }
 
     context "without events" do
       it "loads new aggregate" do
-        expect(load).to be_instance_of(AdAggregate).and have_attributes(
+        expect(load).to be_instance_of(aggregate_class).and have_attributes(
           id: stream_name,
           state: :new
         )
